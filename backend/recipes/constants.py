@@ -1,0 +1,2 @@
+MIN_TIME = 1
+MIN_AMOUNT = 1
