@@ -1,0 +1,48 @@
+version: '3.9'
+
+volumes:
+  pg_data:
+  static:
+  media:
+
+services:
+  db:
+    image: postgres:13
+    restart: always
+    env_file: ../.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  frontend:
+    container_name: cookly-front
+    image: vovalee/cookly_frontend
+    volumes:
+      - ../frontend/:/app/result_build/
+      - static:/app/result_build/build/static
+    depends_on:
+      - backend
+
+  nginx:
+    container_name: cookly-proxy
+    image: vovalee/cookly_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
+      - static:/usr/share/nginx/html/static
+      - media:/usr/share/nginx/html/media
+    depends_on:
+      - backend
+      - frontend
+  
+  backend:
+    container_name: cookly-backend
+    env_file: ../.env
+    image: vovalee/cookly_backend
+    volumes:
+      - media:/app/media
+      - static:/backend_static/static
+      - /root/cookly/data:/app/data
+    depends_on:
+      - db
